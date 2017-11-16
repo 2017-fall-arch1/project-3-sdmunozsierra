@@ -1,20 +1,25 @@
 all: libCircle.a circledemo.elf
 
+GCC_DIR = /opt/ti/msp430_gcc/bin
+SUPPORT_FILE_DIRECTORY = /opt/ti/msp430_gcc/include
+
 CPU             = msp430g2553
-CFLAGS          = -mmcu=${CPU} -Os -I../h
-LDFLAGS		= -L../lib -L/opt/ti/msp430_gcc/include/ 
+CFLAGS          = -I $(SUPPORT_FILE_DIRECTORY) -mmcu=${CPU} -Os -I../h
+#CFLAGS          = -mmcu=${CPU} -Os -I../h
+LDFLAGS		= -L../lib -L $(SUPPORT_FILE_DIRECTORY)
+#LDFLAGS		= -L../lib -L/opt/ti/msp430_gcc/include/ 
 
 #switch the compiler (for the internal make rules)
-CC              = msp430-elf-gcc
-AS              = msp430-elf-as
-AR              = msp430-elf-ar
+CC              = $(GCC_DIR)/msp430-elf-gcc
+AS              = $(GCC_DIR)/msp430-elf-as
+AR              = $(GCC_DIR)/msp430-elf-ar
 
 abCircle_decls.h abCircle.h chordVec.h libCircle.a: makeCircles.c abCircle.o  _abCircle.h Makefile 
 	cc -o makeCircles makeCircles.c
 	rm -rf circles; mkdir circles
 	./makeCircles
 	cat _abCircle.h abCircle_decls.h > abCircle.h
-	(cd circles; $(CC) -I.. -I../../h -mmcu=${CPU} -Os -c *.c)
+	(cd circles; $(CC) -I.. -I../../h -I $(SUPPORT_FILE_DIRECTORY) -mmcu=${CPU} -Os -c *.c)
 	$(AR) crs libCircle.a circles/*.o abCircle.o
 
 abCircle.o: _abCircle.h abCircle.c 

@@ -1,11 +1,18 @@
 # makfile configuration
-CPU             	= msp430g2553
-CFLAGS          	= -mmcu=${CPU} -Os -I../h
-LDFLAGS		= -L../lib -L/opt/ti/msp430_gcc/include/ 
+GCC_DIR = /opt/ti/msp430_gcc/bin
+SUPPORT_FILE_DIRECTORY = /opt/ti/msp430_gcc/include
 
+CPU             	= msp430g2553
+#CFLAGS          	= -mmcu=${CPU} -Os -I../h
+#LDFLAGS		= -L../lib -L/opt/ti/msp430_gcc/include/ 
+
+CFLAGS          = -I $(SUPPORT_FILE_DIRECTORY) -Os -mmcu=${CPU} -I../h
+LDFLAGS		= -L../lib -L $(SUPPORT_FILE_DIRECTORY)
 #switch the compiler (for the internal make rules)
-CC              = msp430-elf-gcc
-AS              = msp430-elf-gcc -mmcu=${CPU} -c
+CC              = $(GCC_DIR)/msp430-elf-gcc
+#CC              = msp430-elf-gcc
+AS              = $(GCC_DIR)/msp430-elf-as -mmcu=${CPU} -c
+#AS              = msp430-elf-gcc -mmcu=${CPU} -c
 
 all:shapemotion.elf
 

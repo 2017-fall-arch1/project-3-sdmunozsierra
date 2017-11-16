@@ -1,4 +1,13 @@
 # Project 3: LCD Game
+
+**NOTE: This repository has changed the location of the original includes
+for the msp430 libraries to work in my personal Linux distribution (Arch).
+This will probably not work for the ones running Fedora VM from class 
+(not tested), but certainly this can be run in any Linux distro by installing
+official msp430 libraries from ti at `/opt/ti`. You have been warned **
+** ALSO you need gcc 7.2.0 or change the dependency from moving-demo assembly
+file **
+
 ## Introduction
 
 Continuing your effort to help ACME Solutions provide Christmas toys, 

@@ -1,13 +1,17 @@
 all: libShape.a shapedemo.elf shapedemo2.elf shapedemo3.elf
+GCC_DIR = /opt/ti/msp430_gcc/bin
+SUPPORT_FILE_DIRECTORY = /opt/ti/msp430_gcc/include
 
 CPU             = msp430g2553
-CFLAGS          = -mmcu=${CPU} -Os -I../h 
-LDFLAGS		= -L../lib -L/opt/ti/msp430_gcc/include/
+CFLAGS          = -I $(SUPPORT_FILE_DIRECTORY) -Os -mmcu=${CPU} -I../h
+LDFLAGS		= -L../lib -L $(SUPPORT_FILE_DIRECTORY)
+#CFLAGS          = -mmcu=${CPU} -Os -I../h 
+#LDFLAGS		= -L../lib -L/opt/ti/msp430_gcc/include/
 
 #switch the compiler (for the internal make rules)
-CC              = msp430-elf-gcc
-AS              = msp430-elf-as
-AR              = msp430-elf-ar
+CC              = $(GCC_DIR)/msp430-elf-gcc
+AS              = $(GCC_DIR)/msp430-elf-as
+AR              = $(GCC_DIR)/msp430-elf-ar
 
 OBJECTS         = shape.o region.o rect.o vec2.o layer.o rarrow.o
 
