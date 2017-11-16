@@ -17,12 +17,12 @@ Layer layer2 = {
   COLOR_BLACK,
   0,
 };
-Layer layer1 = {
+Layer layer1 = { //rectangle in the middle
   (AbShape *)&rect10,
   {screenWidth/2, screenHeight/2}, 	    /* position */
   {0,0}, {0,0},				    /* last & next pos */
   COLOR_RED,
-  &layer2,
+  &layer2, //layer on top arrow
 };
 Layer layer0 = {
   (AbShape *)&rect10,
@@ -40,12 +40,12 @@ main()
 {
   configureClocks();
   lcd_init();
-  shapeInit();
+  //shapeInit();
   Vec2 rectPos = screenCenter, circlePos = {30,screenHeight - 30};
 
   clearScreen(COLOR_BLUE);
   drawString5x7(20,20, "hello", COLOR_GREEN, COLOR_RED);
-  shapeInit();
+  //shapeInit();
   
   layerInit(&layer0);
   layerDraw(&layer0);

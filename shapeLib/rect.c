@@ -18,7 +18,9 @@ abRectCheck(const AbRect *rect, const Vec2 *centerPos, const Vec2 *pixel)
 // compute bounding box in screen coordinates for rect at centerPos
 void abRectGetBounds(const AbRect *rect, const Vec2 *centerPos, Region *bounds)
 {
-  vec2Sub(&bounds->topLeft, centerPos, &rect->halfSize);
+    //They will substract each other so you can draw the button corner and the
+    //upper corner = center - halfsize
+  vec2Sub(&bounds->topLeft, centerPos, &rect->halfSize); 
   vec2Add(&bounds->botRight, centerPos, &rect->halfSize);
 }
 

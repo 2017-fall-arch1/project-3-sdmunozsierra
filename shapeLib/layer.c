@@ -9,10 +9,12 @@ layerDraw(Layer *layers)
   for (row = 0; row < screenHeight; row++) {
     lcd_setArea(0, row, screenWidth-1, row);
     for (col = 0; col < screenWidth; col++) {
+        //for every layer the linklist
       Vec2 pixelPos = {col, row};
       u_int color = bgColor;
       Layer *probeLayer;
       for (probeLayer = layers; probeLayer; probeLayer = probeLayer->next) {
+          //is this pixel on this layer
 	if (abShapeCheck(probeLayer->abShape, &probeLayer->pos, &pixelPos)) {
 	  color = probeLayer->color;
 	  break; 

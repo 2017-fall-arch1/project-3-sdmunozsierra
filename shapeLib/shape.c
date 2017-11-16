@@ -19,6 +19,8 @@ abShapeGetBounds(const AbShape *s, const Vec2 *centerPos, Region *bounds)
 int
 abShapeCheck(const AbShape *s, const Vec2 *centerPos, const Vec2 *pixelLoc)
 {
+    /*  */
   return (*s->check)(s, centerPos, pixelLoc);
 }
 
+/** Get the bounds then  check if on the object*/

@@ -81,8 +81,11 @@ void shapeInit();
  *  rendered at centerPos
  */
 typedef struct AbShape_s {		/* base type for all abstrct shapes */
+    /*  pointer to a function     Draw this shape               here           fill size */
   void (*getBounds)(const struct AbShape_s *shape, const Vec2 *centerPos, Region *bounds);
+  /* is this on the object?       Given shape         position       draw on the object not on background*/
   int (*check)(const struct AbShape_s *shape, const Vec2 *centerPos, const Vec2 *pixelLoc);
+  /* */
 } AbShape;
 
 /** Computes bounding box of abShape in screen coordinates 
@@ -129,7 +132,12 @@ int abRArrowCheck(const AbRArrow *arrow, const Vec2 *centerPos, const Vec2 *pixe
 typedef struct AbRect_s {
   void (*getBounds)(const struct AbRect_s *rect, const Vec2 *centerPos, Region *bounds);
   int (*check)(const struct AbRect_s *shape, const Vec2 *centerPos, const Vec2 *pixel);
-  const Vec2 halfSize;	
+  const Vec2 halfSize;	//the half size 
+  /**
+   i- -------------
+   *|             |
+   *--------------  <-- half size
+   * */
 } AbRect;
 
 /** As required by AbShape
@@ -137,7 +145,7 @@ typedef struct AbRect_s {
 void abRectGetBounds(const AbRect *rect, const Vec2 *centerPos, Region *bounds);
 
 /** As required by AbShape
- */
+ *                   this.   */
 int abRectCheck(const AbRect *rect, const Vec2 *centerPos, const Vec2 *pixel);
 
 typedef AbRect AbRectOutline;	/* same as AbRect */
@@ -162,7 +170,7 @@ typedef struct Layer_s {
   AbShape *abShape;
   Vec2 pos, posLast, posNext; /* initially just set pos */
   u_int color;
-  struct Layer_s *next;
+  struct Layer_s *next; //last layer points to zero
 } Layer;	
 
 /** Compute layer's bounding box.
