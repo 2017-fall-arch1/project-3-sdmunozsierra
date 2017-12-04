@@ -1,11 +1,5 @@
-/** \file shapemotion.c
- *  \brief This is a simple shape motion demo.
- *  This demo creates two layers containing shapes.
- *  One layer contains a rectangle and the other a circle.
- *  While the CPU is running the green LED is on, and
- *  when the screen does not need to be redrawn the CPU
- *  is turned off along with the green LED.
- */  
+#include <msp430.h>
+  
 #include <msp430.h>
 #include <libTimer.h>
 #include <lcdutils.h>
@@ -16,55 +10,41 @@
 
 #define GREEN_LED BIT6
 
+//GREEN COLUMN
 
-AbRect rect10 = {abRectGetBounds, abRectCheck, {10,10}}; /**< 10x10 rectangle */
-AbRArrow rightArrow = {abRArrowGetBounds, abRArrowCheck, 30};
+//Frett Verde
+AbRect frettV = {abRectGetBounds, abRectCheck, {10,10}}; /**< 10x10 rectangle */
 
-AbRectOutline fieldOutline = {	/* playing field */
-  abRectOutlineGetBounds, abRectOutlineCheck,   
-  {screenWidth/2 - 10, screenHeight/2 - 10}
+//Fret Verde de abajo layer 
+Layer lFrettVerde = {		/** Layer with a red square for testing*/
+  (AbShape *)&frettV,
+  {14, screenHeight-10},        /** bottom right */
+  {0,0}, {0,0},		        /* last & next pos */
+  COLOR_GREEN,
+  0,
 };
 
-Layer layer4 = {
-  (AbShape *)&rightArrow,
-  {(screenWidth/2)+10, (screenHeight/2)+5}, /**< bit below & right of center */
-  {0,0}, {0,0},				    /* last & next pos */
-  COLOR_PINK,
-  0
-};
-  
-
-Layer layer3 = {		/**< Layer with an orange circle */
-  (AbShape *)&circle8,
-  {(screenWidth/2)+10, (screenHeight/2)+5}, /**< bit below & right of center */
-  {0,0}, {0,0},				    /* last & next pos */
+//Nota Verde0
+Layer notaV0 = {		/** Layer with a green circle */
+  (AbShape *)&circle12,
+  {15, 5},              /** Top Left Corner */
+  {0,0}, {0,0},	        /* last & next pos */
   COLOR_VIOLET,
-  &layer4,
+  &lFrettVerde,
 };
 
-
-Layer fieldLayer = {		/* playing field as a layer */
-  (AbShape *) &fieldOutline,
-  {screenWidth/2, screenHeight/2},/**< center */
-  {0,0}, {0,0},				    /* last & next pos */
-  COLOR_BLACK,
-  &layer3
+// frett bounds
+AbRectOutline frettVOutline = {
+    abRectOutlineGetBounds, abRectOutlineCheck, 
+    {10, 10}  //size
 };
-
-Layer layer1 = {		/**< Layer with a red square */
-  (AbShape *)&rect10,
-  {screenWidth/2, screenHeight/2}, /**< center */
-  {0,0}, {0,0},				    /* last & next pos */
-  COLOR_RED,
-  &fieldLayer,
-};
-
-Layer layer0 = {		/**< Layer with an orange circle */
-  (AbShape *)&circle14,
-  {(screenWidth/2)+10, (screenHeight/2)+5}, /**< bit below & right of center */
-  {0,0}, {0,0},				    /* last & next pos */
-  COLOR_ORANGE,
-  &layer1,
+ 
+Layer frettVfield = {		/* playing field as a layer */
+  (AbShape *) &frettVOutline,
+  {14, screenHeight-10}, //location
+  {0,0}, {0,0},		/* last & next pos */
+  COLOR_ORANGE_RED,
+  &notaV0,
 };
 
 /** Moving Layer
@@ -77,10 +57,11 @@ typedef struct MovLayer_s {
   struct MovLayer_s *next;
 } MovLayer;
 
-/* initial value of {0,0} will be overwritten */
-MovLayer ml3 = { &layer3, {1,1}, 0 }; /**< not all layers move */
-MovLayer ml1 = { &layer1, {1,2}, &ml3 }; 
-MovLayer ml0 = { &layer0, {2,1}, &ml1 }; 
+//nota Verde Cayendo
+                                //Add if you use more layers
+MovLayer mlV = { &notaV0, {0,1}, 0 }; 
+
+//END GREEN COLUMN
 
 void movLayerDraw(MovLayer *movLayers, Layer *layers)
 {
@@ -119,37 +100,24 @@ void movLayerDraw(MovLayer *movLayers, Layer *layers)
   } // for moving layer being updated
 }	  
 
-
-
-//Region fence = {{10,30}, {SHORT_EDGE_PIXELS-10, LONG_EDGE_PIXELS-10}}; /**< Create a fence region */
-
-/** Advances a moving shape within a fence
- *  
- *  \param ml The moving shape to be advanced
- *  \param fence The region which will serve as a boundary for ml
- */
-void mlAdvance(MovLayer *ml, Region *fence)
-{
+void mlVAdv(MovLayer *ml, Region *frett){
+//void mlVAdv(MovLayer *ml, Region *fence){
   Vec2 newPos;
   u_char axis;
   Region shapeBoundary;
+  //Region frettBoundary;
+
+  //layerGetBounds(&fieldLayer, &fieldFence);
+
   for (; ml; ml = ml->next) {
     vec2Add(&newPos, &ml->layer->posNext, &ml->velocity);
     abShapeGetBounds(ml->layer->abShape, &newPos, &shapeBoundary);
-    //collition
-    for (axis = 0; axis < 2; axis ++) {
-      if ((shapeBoundary.topLeft.axes[axis] < fence->topLeft.axes[axis]) ||
-	  (shapeBoundary.botRight.axes[axis] > fence->botRight.axes[axis]) ) {
-	int velocity = ml->velocity.axes[axis] = -ml->velocity.axes[axis];
-	newPos.axes[axis] += (2*velocity); //if hit the wall then twice to the other direction
-      }	/**< if outside of fence */
-    } /**< for axis */
+    int velocity = ml->velocity.axes[axis] = -ml->velocity.axes[axis];
     ml->layer->posNext = newPos;
-  } /**< for ml */
+  } /** for ml */
 }
 
-
-u_int bgColor = COLOR_BLUE;     /**< The background color */
+u_int bgColor = COLOR_WHITE;     /**< The background color */
 int redrawScreen = 1;           /**< Boolean for whether screen needs to be redrawn */
 
 Region fieldFence;		/**< fence around playing field  */
@@ -160,26 +128,25 @@ Region fieldFence;		/**< fence around playing field  */
  */
 void main()
 {
-  P1DIR |= GREEN_LED;		/**< Green led on when CPU on */		
+  P1DIR |= GREEN_LED;		
   P1OUT |= GREEN_LED;
-
   configureClocks();
   lcd_init();
   shapeInit();
+
   p2sw_init(1);
 
   shapeInit();
 
-  layerInit(&layer0);
-  layerDraw(&layer0);
+  layerInit(&frettVfield );
+  layerDraw(&frettVfield );
 
+  drawString5x7(20,20, "hello", COLOR_GREEN, COLOR_RED);
 
-  layerGetBounds(&fieldLayer, &fieldFence);
-
+  layerGetBounds(&frettVfield, &fieldFence);
 
   enableWDTInterrupts();      /**< enable periodic interrupt */
   or_sr(0x8);	              /**< GIE (enable interrupts) */
-
 
   //Forever in C
   for(;;) { 
@@ -190,7 +157,9 @@ void main()
     }
     P1OUT |= GREEN_LED;       /**< Green led on when CPU on */
     redrawScreen = 0;
-    movLayerDraw(&ml0, &layer0);
+    movLayerDraw(&mlV, &notaV0);
+    //TEST SCORE
+    drawString5x7(100,200, "hello", COLOR_GREEN, COLOR_RED);
   }
 }
 
@@ -201,7 +170,7 @@ void wdt_c_handler()
   P1OUT |= GREEN_LED;		      /**< Green LED on when cpu on */
   count ++;
   if (count == 15) {
-    mlAdvance(&ml0, &fieldFence);
+    mlVAdv(&mlV, &fieldFence);
     if (p2sw_read())
       redrawScreen = 1;
     count = 0;
