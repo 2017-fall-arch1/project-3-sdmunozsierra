@@ -6,11 +6,34 @@
 #include <p2switches.h>
 #include <shape.h>
 #include <abCircle.h>
+#include "buzzer.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 
 #define GREEN_LED BIT6
+
+#define A 2273
+#define B 2025
+#define CN 1911
+#define D 1703
+#define E 659
+#define F 716
+#define G 391
+#define REST 1
+
+
+// A lo sholo song
+static short MARIO ;
+
+
+static int JP[] = {D,CN,D,D,REST,REST,REST,REST,D,CN,D,D
+		   ,REST,REST,REST,REST,D,CN,D,D,REST,E
+		   ,REST,E,REST,G,REST,G,G,REST,F,D,E,REST,CN,A
+		   ,REST,F,D,E,E,E,E,REST,A,D,G,REST,F,REST,F
+		   ,REST,E,REST,E,E,E,E,REST,REST,D,CN,D,REST,A,G,REST
+		   ,D,CN,D,REST,A,G,REST,REST,D,CN,CN,D,REST
+		   ,A,A,D,D,CN,CN,CN,CN,0};
 
 //GREEN COLUMN
 
@@ -44,117 +67,34 @@ Layer lFrettVerde2 = {		/** Layer with a red square for testing*/
 
 //Nota Verde0
 Layer notaV0 = {		/** Layer with a green circle */
-  (AbShape *)&circle12,
-  {15, 5},              /** Top Left Corner */
+  (AbShape *)&circle10,
+  {20, 5},              /** Top Left Corner */
   {0,0}, {0,0},	        /* last & next pos */
   COLOR_GREEN,
   &lFrettVerde2,
 };
 
-//Frett Rojo Shapes
-//AbRect frettR0= {abRectGetBounds, abRectCheck, {30,5}}; //Rectangle zone
-//AbRect frettR1= {abRectGetBounds, abRectCheck, {30,5}}; //Rectangle zone
-//AbRect frettR2= {abRectGetBounds, abRectCheck, {30,5}}; //Rectangle zone
-
-//Fret Rojo layer
-/** 
-Layer lFrettRojo0 = {		
-  (AbShape *)&frettV0,
-  {30, screenHeight-20},       
-  {0,0}, {0,0},		      
-  COLOR_YELLOW,
-  0,
-};
-Layer lFrettRojo1 = {	
-  (AbShape *)&frettV1,
-  {30, screenHeight-10},
-  {0,0}, {0,0},	
-  COLOR_GREEN,
-  &lFrettRojo0,
-};
-Layer lFrettRojo2 = {	
-  (AbShape *)&frettV2,
-  {30, screenHeight},  
-  {0,0}, {0,-5},
-  COLOR_ORANGE,
-  &lFrettRojo1,
-};
-*/
-
 //Nota Roja0
 Layer notaR0 = {		
-  (AbShape *)&circle12,
+  (AbShape *)&circle10,
   {50, 5},              
   {0,0}, {0,0},	       
   COLOR_RED,
   &notaV0,
 };
 
-//Frett Amarillo
-//AbRect frettA0= {abRectGetBounds, abRectCheck, {30,5}}; //Rectangle zone
-//AbRect frettA1= {abRectGetBounds, abRectCheck, {30,5}}; //Rectangle zone
-//AbRect frettA2= {abRectGetBounds, abRectCheck, {30,5}}; //Rectangle zone
-
-//Fret Amarillo layer 
-/**
-Layer lFrettAmarillo0 = {
-  (AbShape *)&frettV0,
-  {70, screenHeight-20},       
-  {0,0}, {0,0},		        
-  COLOR_YELLOW,
-  0,
-};
-Layer lFrettAmarillo1 = {
-  (AbShape *)&frettV1,
-  {70, screenHeight-10},        
-  {0,0}, {0,0},		
-  COLOR_GREEN,
-  &lFrettAmarillo0,
-};
-Layer lFrettAmarillo2 = {
-  (AbShape *)&frettV2,
-  {70, screenHeight},        
-  {0,0}, {0,-5},
-  COLOR_ORANGE,
-  &lFrettAmarillo1,
-};
-*/
 //Nota Amarilla
 Layer notaA0 = {		
-  (AbShape *)&circle12,
+  (AbShape *)&circle10,
   {80, 5},              
   {0,0}, {0,0},	       
   COLOR_YELLOW,
   &notaR0,
 };
 
-//Fret Azul de abajo layer 
-/**
-Layer lFrettAzul0 = {
-  (AbShape *)&frettV0,
-  {110, screenHeight-20},       
-  {0,0}, {0,0},		        
-  COLOR_BLACK,
-  0,
-};
-Layer lFrettAzul1 = {
-  (AbShape *)&frettV1,
-  {110, screenHeight-10},        
-  {0,0}, {0,0},		
-  COLOR_BLACK,
-  &lFrettAzul0,
-};
-Layer lFrettAzul2 = {
-  (AbShape *)&frettV2,
-  {110, screenHeight},        
-  {0,0}, {0,-5},
-  COLOR_BLACK,
-  &lFrettAzul1,
-};
-*/
 //Nota Azul
 Layer notaB0 = {		
-  (AbShape *)&circle12,
+  (AbShape *)&circle10,
   {110, 5},              
   {0,0}, {0,0},	       
   COLOR_BLUE,
@@ -238,65 +178,65 @@ Vec2 selectPosition(char p){
     return newPos;
 }
 
-/** Glonal Variables */
+/** Global Variables */
 u_int bgColor = COLOR_WHITE;     /**< The background color */
 int redrawScreen = 1;           /**< Boolean for whether screen needs to be redrawn */
 
-char butt0 = 0; //button 0 deactivated
-char butt1 = 0; //button 1 deactivated
-char butt2 = 0; //button 2 deactivated
-char butt3 = 0; //button 3 deactivated
+char butt0 = 0; //button 0 deactivated until triggered
+char butt1 = 0; //button 1 deactivated until triggered
+char butt2 = 0; //button 2 deactivated until triggered
+char butt3 = 0; //button 3 deactivated until triggered
 
-char* score; 
+char* score; //Keep track of the score
 
 /** Initializes everything, enables interrupts and green LED, 
  *  and handles the rendering for the screen
  */
-void main()
-{
+void main(){
   P1DIR |= GREEN_LED;		
   P1OUT |= GREEN_LED;
   configureClocks();
   lcd_init();
   p2sw_init(15);
+  buzzer_init();
+  
 
-  //layerInit(&lFrettVerde2 );
-  //layerDraw(&lFrettVerde2 );
+  int c2 = 0;
 
-  /**
-  layerInit(&notaV0 );
-  layerDraw(&notaV0 );
+    
+      if(c2<sizeof(JP))
+	buzzer_set_period(JP[c2++]);  /* iterates through notes */
+	//if(JP[c2]==0)                 /* red led = end of song*/
+    else
+	buzzer_set_period(0);  /* iterates through notes */
 
-  layerInit(&notaR0 );
-  layerDraw(&notaR0 );
 
-  layerInit(&notaA0 );
-  layerDraw(&notaA0 );
-
-  */
-//  layerInit(&notaV0 );
- // layerDraw(&notaV0 );
-
-  layerInit(&notaB0 );
-  layerDraw(&notaB0 );
-  score = 0;
+  layerInit(&notaB0); //Init nota azul (linked list to all layers)
+  layerDraw(&notaB0); //Draw nota azul (linked list to all layers)
+  score = 0; //Score set to 0?? TODO check this out
 
   enableWDTInterrupts();      /**< enable periodic interrupt */
   or_sr(0x8);	              /**< GIE (enable interrupts) */
 
+     
+    //if(MARIO[c2]==0) 
+        //buzzer_set_period(0);
+
+
+
   //Forever in C
   for(;;) { 
       //drawString5x7(80,40, score, COLOR_BLACK, bgColor);
-      butt0 = 0;
-      butt1 = 0;
-      butt2 = 0;
-      butt3 = 0;
+
+      /** Button setup and updates */
+      butt0 = butt1 = butt2 = butt3 = 0;
       u_int switches = p2sw_read(), i;
       char str[5];
       for (i = 0; i < 4; i++)
           str[i] = (switches & (1<<i)) ? '-' : '1'+i;;
       str[4] = 0;
       
+
       if (str[0] == '1')
           butt0 = 1;
       if (str[1] == '2')
@@ -305,7 +245,6 @@ void main()
           butt2 = 1;
       if (str[3] == '4')
           butt3 = 1;
-      //drawString5x7(80,20, str, COLOR_GREEN, bgColor);
 
       /** Watchdog will interrupt this and turn on the CPU */
       while (!redrawScreen) { /**< Pause CPU if screen doesn't need updating */
@@ -318,6 +257,7 @@ void main()
       movLayerDraw(&mlR, &notaR0);
       movLayerDraw(&mlA, &notaA0);
       movLayerDraw(&mlB, &notaB0);
+
   }
 }
 
@@ -368,64 +308,6 @@ void kamikazeV(MovLayer *ml, Layer *zone1, Layer *zone2, Layer *zone3, char colo
     } //end infinite for
 }//end mlAdvance
 
-
-void mlAdvance(MovLayer *ml, Layer *zone1, Layer *zone2, Layer *zone3, char carril){
-    //Vector2 for location
-    Vec2 newPos;
-
-    //Boundaries for "Objects"
-    Region noteBound;
-    Region noteBound1;
-    Region noteBound2;
-    Region noteBound3;
-    Region z1Bound;
-    Region z2Bound;
-    Region z3Bound;
-    layerGetBounds(zone1, &z1Bound);
-    layerGetBounds(zone2, &z2Bound);
-    layerGetBounds(zone3, &z3Bound);
-
-    // Get switches
-    u_int switches = p2sw_read(), i;
-    char str[5];
-
-    //Infinite for loop
-    for (; ml; ml = ml->next) {
-        vec2Add(&newPos, &ml->layer->posNext, &ml->velocity);
-        //Get bounds for each new posigion
-        abShapeGetBounds(ml->layer->abShape, &newPos, &noteBound);
-
-        for (i = 0; i < 4; i++)
-            str[i] = (switches & (1<<i));
-        str[4] = 0;
-
-        //Hit first zone
-        if((noteBound.botRight.axes[1] > z1Bound.topLeft.axes[1]) 
-                && (str[0] == 1)
-                && (noteBound.botRight.axes[1] < z2Bound.topLeft.axes[1])
-                && (noteBound.botRight.axes[1] < z3Bound.topLeft.axes[1]) )
-        {
-            //Missing && PRESS BUTT -> GIVE 1 POINT
-            newPos = selectPosition(carril);
-        }
-        //Hit second zone CHANGE TO BUTT 1
-        if((noteBound.botRight.axes[1] > z2Bound.topLeft.axes[1]) && (str[carril] == 1)
-                && (noteBound.botRight.axes[1] < z3Bound.topLeft.axes[1]) )
-        {
-            newPos = selectPosition(carril);
-        }
-        //Hit third zone
-        if((noteBound.botRight.axes[1] > z3Bound.topLeft.axes[1]) && (str[carril] == 1) )
-        {
-            newPos = selectPosition(carril);
-        }
-
-        ml->layer->posNext = newPos;
-
-    } //end infinite for
-}//end mlAdvance
-
-
 /** Watchdog timer interrupt handler. 15 interrupts/sec */
 void wdt_c_handler()
 {
@@ -438,13 +320,7 @@ void wdt_c_handler()
     kamikazeV(&mlR,&lFrettVerde0,&lFrettVerde1,&lFrettVerde2,1,butt1);
     kamikazeV(&mlA,&lFrettVerde0,&lFrettVerde1,&lFrettVerde2,2,butt2);
     kamikazeV(&mlB,&lFrettVerde0,&lFrettVerde1,&lFrettVerde2,3,butt3);
-   // mlAdvance(&mlV,&lFrettVerde0,&lFrettVerde1,&lFrettVerde2,0);
-   // mlAdvance(&mlR,&lFrettVerde0,&lFrettVerde1,&lFrettVerde2,1);
-   // mlAdvance(&mlA,&lFrettVerde0,&lFrettVerde1,&lFrettVerde2,2);
-//    mlAdvance(&mlB,&lFrettVerde0,&lFrettVerde1,&lFrettVerde2,3);
-    //mlAdvance(&mlR,&lFrettRojo0,&lFrettRojo1,&lFrettRojo2,1);
-    //mlAdvance(&mlA,&lFrettAmarillo0,&lFrettAmarillo1,&lFrettAmarillo2,2);
-    //mlAdvance(&mlA,&lFrettAzul0,&lFrettAzul1,&lFrettAzul2,3);
+
     if (p2sw_read())
       redrawScreen = 1;
     count = 0;
