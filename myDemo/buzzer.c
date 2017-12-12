@@ -2,8 +2,9 @@
 #include "libTimer.h"
 #include "buzzer.h"
 
-static unsigned int period = 1000;
-static signed int rate = 200;	
+
+static long counter = 0;
+static long temp = 0;	
 
 #define MIN_PERIOD 1000
 #define MAX_PERIOD 4000
@@ -25,9 +26,63 @@ void buzzer_init()
 
 }
 
-
 void buzzer_set_period(short cycles)
 {
   CCR0 = cycles; 
   CCR1 = cycles >> 1;		/* one half cycle */
 }
+
+void playA()
+{
+    temp = 9000;
+    buzzer_set_period(872);
+    while(++counter < temp){}
+    counter = 0; 
+    buzzer_set_period(0);
+}
+void playBn()
+{
+    temp = 9000;
+    buzzer_set_period(978);
+    while(++counter < temp){}
+    counter = 0; 
+    buzzer_set_period(0);
+}
+void playCF()
+{
+    temp = 9000;
+    buzzer_set_period(1163);
+    while(++counter < temp){}
+    counter = 0; 
+    buzzer_set_period(0);
+}
+
+void playE()
+{
+    temp = 9000;
+    buzzer_set_period(1306);
+    while(++counter < temp){}
+    counter = 0;
+    buzzer_set_period(0);
+}
+
+void play(char choice)
+{
+    switch (choice)
+    {
+        case 1:
+            playBn();
+            break;
+        case 2:
+            playCF();
+            break;
+        case 3: 
+            playE();
+            break;
+        case 4: 
+            playA();
+            break;
+    }
+}
+
+

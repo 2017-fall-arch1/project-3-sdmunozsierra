@@ -15,7 +15,7 @@ AR              = $(GCC_DIR)/msp430-elf-ar
 myDemo.elf: myDemo.o
 	$(CC) $(CFLAGS) ${LDFLAGS} -o $@ $^ -lLcd -lTimer -lShape
 
-fallingBalls.elf: fallingBalls.o wdt_handler.o buzzer.o
+fallingBalls.elf: fallingBalls.o wdt_handler.o buzzer.o compileToAssm.s
 	$(CC) $(CFLAGS) ${LDFLAGS} -o $@ $^ -lLcd -lTimer -lShape -lCircle -lp2sw
 
 clean:
